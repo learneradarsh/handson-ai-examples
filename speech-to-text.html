@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-time Speech-to-Text</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #121212;
+            color: white;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        #output {
+            font-size: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 100px;
+            display: inline-block;
+            width: 70%;
+            text-align: left;
+            background: #1e1e1e;
+            color: #ffffff;
+            border: 2px solid #ff9800;
+            box-shadow: 0px 4px 8px rgba(255, 152, 0, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+        button {
+            font-size: 18px;
+            padding: 12px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .start {
+            background: #4caf50;
+            color: white;
+        }
+        .start:hover {
+            background: #45a049;
+        }
+        .stop {
+            background: #f44336;
+            color: white;
+        }
+        .stop:hover {
+            background: #d32f2f;
+        }
+        .loader {
+            display: none;
+            margin: 20px auto;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top: 6px solid #ff9800;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎤 Real-time Speech-to-Text</h1>
+    <button class="start" onclick="startListening()">Start Listening</button>
+    <button class="stop" onclick="stopListening()">Stop Listening</button>
+    <div class="loader" id="loader"></div>
+    <div id="output">Your speech will appear here...</div>
+
+    <script>
+        let recognition;
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = "en-US";
+
+            recognition.onstart = () => {
+                document.getElementById("loader").style.display = "block";
+            };
+
+            recognition.onresult = (event) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                document.getElementById("output").innerText = transcript;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech recognition error:", event.error);
+            };
+
+            recognition.onend = () => {
+                document.getElementById("loader").style.display = "none";
+            };
+        } else {
+            alert("Your browser does not support Speech Recognition. Try Chrome or Edge.");
+        }
+
+        function startListening() {
+            if (recognition) {
+                recognition.start();
+            }
+        }
+
+        function stopListening() {
+            if (recognition) {
+                recognition.stop();
+            }
+        }
+    </script>
+</body>
+</html>
