@@ -1,20 +1,7 @@
-# image-classifier-zero-setup
-
-# AI in Your Browser - Image Classification using TensorFlow.js 🖼️🤖
-
-This project demonstrates how **AI can run directly in your browser** without any backend server! 🏎️  
-It uses **TensorFlow.js and MobileNet** to classify objects in images **instantly**.
-
----
-
-## 🚀 Features
-✅ **Runs directly in the browser** - No installations needed!  
-✅ **Real-time Image Classification** using TensorFlow.js  
-✅ **Zero backend required** - Everything happens client-side  
-✅ **Loader animation** while AI processes the image  
-✅ **Modern UI with smooth user experience**  
-
----
+## Combination of Projects
+- Speech to Text
+- Voice Agent
+- Image Processing
 
 ## 📌 How to Run?  
 
