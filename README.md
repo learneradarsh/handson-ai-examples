@@ -2,6 +2,7 @@
 - Speech to Text
 - Voice Agent
 - Image Processing
+- AI Attendace System
 
 ## 📌 How to Run?  
 
