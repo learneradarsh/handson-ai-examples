@@ -8,7 +8,6 @@
 ### **1️⃣ Open with Zero Setup (Direct Method)**
 1. Download the `index.html` file.
 2. **Double-click** to open it in any modern web browser (Chrome, Edge, Firefox).
-3. Upload an image and watch AI predict the object! 🎉  
 
 💡 **Works on any system with a browser** – No need for installations!
 
