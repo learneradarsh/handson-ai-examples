@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart AI Attendance</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; }
+        h1 { color: #007bff; }
+        button { padding: 10px 15px; font-size: 16px; margin-top: 10px; cursor: pointer; }
+        table { margin: 20px auto; border-collapse: collapse; width: 50%; background: white; }
+        th, td { padding: 10px; border: 1px solid black; text-align: center; }
+        th { background-color: #007bff; color: white; }
+
+        /* Loader Styling */
+        .loader {
+            display: none;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎓 AI-Powered Smart Attendance</h1>
+    <p>AI Calls Each Student's Name & Waits for Response</p>
+    
+    <button onclick="startAttendance()">📢 Start Attendance</button>
+    <div class="loader" id="loader"></div>
+    
+    <h2 id="currentStudent"></h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="attendanceTable">
+            <tr><td>John Doe</td><td id="John">Pending ⏳</td></tr>
+            <tr><td>Jane Smith</td><td id="Jane">Pending ⏳</td></tr>
+            <tr><td>Mike Johnson</td><td id="Mike">Pending ⏳</td></tr>
+        </tbody>
+    </table>
+
+    <script>
+        const students = ["John", "Jane", "Mike"];
+        let currentStudentIndex = 0;
+        let recognition;
+        let timeout;
+
+        function startAttendance() {
+            if ('speechSynthesis' in window) {
+                nextStudent();
+            } else {
+                alert("Speech Synthesis not supported in this browser.");
+            }
+        }
+
+        function nextStudent() {
+            if (currentStudentIndex >= students.length) {
+                alert("Attendance completed!");
+                return;
+            }
+
+            let student = students[currentStudentIndex];
+            document.getElementById("currentStudent").innerText = `📢 Calling: ${student}, say "Present"`;
+            
+            speak(student);
+
+            timeout = setTimeout(() => {
+                markAbsent(student);
+                currentStudentIndex++;
+                nextStudent();
+            }, 30000);  // 30 seconds timeout
+        }
+
+        function speak(name) {
+            let msg = new SpeechSynthesisUtterance(`${name}, please say Present.`);
+            msg.lang = "en-US";
+            msg.onend = () => startListening();
+            window.speechSynthesis.speak(msg);
+        }
+
+        function startListening() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+
+            recognition.onresult = function(event) {
+                let speech = event.results[0][0].transcript.toLowerCase();
+                console.log("Heard:", speech);
+
+                if (speech.includes("present")) {
+                    clearTimeout(timeout);
+                    markPresent(students[currentStudentIndex]);
+                    currentStudentIndex++;
+                    setTimeout(nextStudent, 1000);
+                }
+            };
+
+            recognition.onerror = function() {
+                console.log("Speech recognition error!");
+            };
+        }
+
+        function markPresent(name) {
+            document.getElementById(name).innerText = "✅ Present";
+            localStorage.setItem(name, "✅ Present");
+            console.log(`${name} marked as Present!`);
+        }
+
+        function markAbsent(name) {
+            document.getElementById(name).innerText = "❌ Absent";
+            localStorage.setItem(name, "❌ Absent");
+            console.log(`${name} marked as Absent!`);
+        }
+
+        // Load stored attendance on refresh
+        window.onload = function() {
+            document.querySelectorAll("td[id]").forEach(td => {
+                td.innerText = localStorage.getItem(td.id) || "Pending ⏳";
+            });
+        };
+    </script>
+
+</body>
+</html>
