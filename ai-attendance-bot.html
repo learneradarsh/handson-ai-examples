@@ -61,10 +61,10 @@
         let timeout;
 
         function startAttendance() {
-            if ('speechSynthesis' in window) {
+            if ('speechSynthesis' in window && 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
                 nextStudent();
             } else {
-                alert("Speech Synthesis not supported in this browser.");
+                alert("Speech features are not supported in this browser.");
             }
         }
 
@@ -76,14 +76,9 @@
 
             let student = students[currentStudentIndex];
             document.getElementById("currentStudent").innerText = `📢 Calling: ${student}, say "Present"`;
+            showLoader(true);
             
             speak(student);
-
-            timeout = setTimeout(() => {
-                markAbsent(student);
-                currentStudentIndex++;
-                nextStudent();
-            }, 30000);  // 30 seconds timeout
         }
 
         function speak(name) {
@@ -96,22 +91,34 @@
         function startListening() {
             recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
             recognition.lang = "en-US";
+            recognition.continuous = true;  // Keep listening until timeout
+            recognition.interimResults = false; 
+
             recognition.start();
+            console.log("Listening started...");
+
+            timeout = setTimeout(() => {
+                recognition.stop();
+                markAbsent(students[currentStudentIndex]);
+                moveToNextStudent();
+            }, 30000);  // 30-second timeout
 
             recognition.onresult = function(event) {
                 let speech = event.results[0][0].transcript.toLowerCase();
                 console.log("Heard:", speech);
 
                 if (speech.includes("present")) {
-                    clearTimeout(timeout);
+                    clearTimeout(timeout); // Stop timeout if response is received
+                    recognition.stop();
                     markPresent(students[currentStudentIndex]);
-                    currentStudentIndex++;
-                    setTimeout(nextStudent, 1000);
+                    moveToNextStudent();
                 }
             };
 
-            recognition.onerror = function() {
-                console.log("Speech recognition error!");
+            recognition.onerror = function(event) {
+                console.log("Speech recognition error:", event.error);
+                recognition.stop();
+                moveToNextStudent();
             };
         }
 
@@ -125,6 +132,16 @@
             document.getElementById(name).innerText = "❌ Absent";
             localStorage.setItem(name, "❌ Absent");
             console.log(`${name} marked as Absent!`);
+        }
+
+        function moveToNextStudent() {
+            showLoader(false);
+            currentStudentIndex++;
+            setTimeout(nextStudent, 1000);
+        }
+
+        function showLoader(show) {
+            document.getElementById("loader").style.display = show ? "block" : "none";
         }
 
         // Load stored attendance on refresh
